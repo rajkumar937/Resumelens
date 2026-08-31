@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}ResumeLens — Analyse{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════ UPLOAD PANEL ═══════════════════ -->
+<section class="upload-section" id="uploadSection" aria-label="Upload resume">
+  <div class="container">
+    <div class="upload-card">
+      <div class="upload-header">
+        <h1 class="upload-title">Analyse Your Resume</h1>
+        <p class="upload-subtitle">Upload a PDF and optionally paste a job description to get a match score.</p>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="drop-zone" id="dropZone" role="button" tabindex="0"
+           aria-label="Drop PDF here or click to browse">
+        <div class="drop-zone__idle">
+          <div class="drop-icon">📄</div>
+          <p class="drop-label">Drop your PDF here</p>
+          <p class="drop-hint">or <span class="browse-link">click to browse</span></p>
+        </div>
+        <div class="drop-zone__selected hidden">
+          <div class="drop-icon">✅</div>
+          <p class="drop-label" id="selectedFilename">No file</p>
+          <p class="drop-hint">Click to change</p>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf" class="file-input-hidden" aria-label="Choose PDF file" />
+      </div>
+
+      <!-- JD textarea -->
+      <div class="jd-section">
+        <label class="field-label" for="jdTextarea">
+          Job Description <span class="optional">(optional)</span>
+        </label>
+        <textarea id="jdTextarea" class="jd-textarea"
+                  placeholder="Paste the job description here for skill matching and a match score…"
+                  rows="6" aria-describedby="wordCountLabel"></textarea>
+        <p class="word-count" id="wordCountLabel" aria-live="polite">0 words</p>
+      </div>
+
+      <button class="btn btn--primary btn--full" id="analyseBtn" disabled
+              aria-disabled="true">
+        <span class="btn-text">Analyse Resume</span>
+        <span class="btn-spinner hidden" aria-hidden="true">⏳</span>
+      </button>
+
+      <div class="upload-error hidden" id="uploadError" role="alert" aria-live="assertive"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ RESULTS DASHBOARD ═══════════════════ -->
+<section class="dashboard hidden" id="dashboard" aria-label="Analysis results">
+  <div class="container">
+
+    <!-- Warnings -->
+    <div class="warnings-bar hidden" id="warningsBar" role="alert" aria-live="polite"></div>
+
+    <!-- Score hero -->
+    <div class="score-hero">
+      <div class="score-card">
+  <span class="score-label">Match Score</span>
+  <span class="score-value" id="scoreValue">—</span>
+</div>
+      <div class="score-bars">
+        <div class="bar-row">
+          <span class="bar-label">Text Similarity</span>
+          <div class="bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="0" aria-label="Text similarity">
+            <div class="bar-fill bar-fill--blue" id="barText"></div>
+          </div>
+          <span class="bar-pct" id="pctText">—</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Skill Match</span>
+          <div class="bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="0" aria-label="Skill match">
+            <div class="bar-fill bar-fill--green" id="barSkill"></div>
+          </div>
+          <span class="bar-pct" id="pctSkill">—</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Skills Matched</span>
+          <div class="bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+               aria-valuenow="0" aria-label="Skills matched count">
+            <div class="bar-fill bar-fill--purple" id="barMatched"></div>
+          </div>
+          <span class="bar-pct" id="pctMatched">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-grid" aria-label="Resume statistics">
+      <div class="stat-card">
+        <span class="stat-value" id="statPages">—</span>
+        <span class="stat-label">Pages</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statWords">—</span>
+        <span class="stat-label">Words</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statSkillsFound">—</span>
+        <span class="stat-label">Skills Found</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statMatched">—</span>
+        <span class="stat-label">Matched</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statMissing">—</span>
+        <span class="stat-label">Missing</span>
+      </div>
+    </div>
+
+    <!-- Score explanation -->
+    <details class="explanation-box">
+      <summary>How is the score calculated?</summary>
+      <div class="explanation-body" id="explanationBody"></div>
+    </details>
+
+    <!-- Tabs -->
+    <div class="tab-bar" role="tablist" aria-label="Result sections">
+      <button class="tab-btn active" role="tab" aria-selected="true"
+              aria-controls="tabOverview" id="tabBtnOverview" data-tab="overview">Overview</button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              aria-controls="tabSkills" id="tabBtnSkills" data-tab="skills">Skills</button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              aria-controls="tabInfo" id="tabBtnInfo" data-tab="info">Resume Info</button>
+      <button class="tab-btn" role="tab" aria-selected="false"
+              aria-controls="tabRaw" id="tabBtnRaw" data-tab="raw">Raw Text</button>
+    </div>
+
+    <!-- Overview tab -->
+    <div class="tab-panel active" id="tabOverview" role="tabpanel" aria-labelledby="tabBtnOverview">
+      <p class="overview-hint">Select another tab to explore skills, resume details, or raw extracted text.</p>
+    </div>
+
+    <!-- Skills tab -->
+    <div class="tab-panel hidden" id="tabSkills" role="tabpanel" aria-labelledby="tabBtnSkills">
+      <div class="skills-section" id="skillsMatched"></div>
+      <div class="skills-section" id="skillsMissing"></div>
+      <div class="skills-section" id="skillsResume"></div>
+      <div class="skills-section" id="skillsJD"></div>
+    </div>
+
+    <!-- Resume Info tab -->
+    <div class="tab-panel hidden" id="tabInfo" role="tabpanel" aria-labelledby="tabBtnInfo">
+      <div id="resumeInfoPanel"></div>
+    </div>
+
+    <!-- Raw Text tab -->
+    <div class="tab-panel hidden" id="tabRaw" role="tabpanel" aria-labelledby="tabBtnRaw">
+      <div class="raw-controls">
+        <div class="page-tabs" id="pageTabs" role="tablist" aria-label="Pages"></div>
+        <button class="btn btn--ghost" id="copyBtn" aria-label="Copy text to clipboard">Copy</button>
+      </div>
+      <pre class="raw-text" id="rawText" aria-live="polite"></pre>
+    </div>
+
+  </div><!-- /.container -->
+
+  <div class="container">
+    <div class="new-analysis-wrap">
+      <button class="btn btn--outline" id="newAnalysisBtn">New Analysis</button>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

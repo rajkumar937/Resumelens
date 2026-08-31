@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}ResumeLens — Record #{{ record.id }}{% endblock %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="history-detail-section">
+  <div class="container">
+
+    <div class="detail-header">
+      <a href="{{ url_for('main.history') }}" class="back-link">← Back to History</a>
+      <h1 class="page-title">Record #{{ record.id }}</h1>
+    </div>
+
+    <!-- Meta card -->
+    <div class="detail-meta-card">
+      <div class="meta-row"><span class="meta-label">File</span><span class="meta-value">{{ record.filename }}</span></div>
+      <div class="meta-row"><span class="meta-label">Candidate</span><span class="meta-value">{{ record.resume_name or '—' }}</span></div>
+      <div class="meta-row"><span class="meta-label">Date (UTC)</span><span class="meta-value">{{ record.analysis_date }}</span></div>
+      {% if record.jd_summary %}
+        <div class="meta-row meta-row--col">
+          <span class="meta-label">Job Description (first 300 chars)</span>
+          <span class="meta-value meta-jd">{{ record.jd_summary }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Score cards -->
+    <div class="stat-grid">
+      <div class="stat-card stat-card--highlight">
+        <span class="stat-value">{{ record.overall_score | round(1) }}%</span>
+        <span class="stat-label">Overall Match</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ record.text_similarity | round(1) }}%</span>
+        <span class="stat-label">Text Similarity</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ record.skill_match | round(1) }}%</span>
+        <span class="stat-label">Skill Match</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value td-green">{{ record.matched_skills | length }}</span>
+        <span class="stat-label">Matched Skills</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value td-red">{{ record.missing_skills | length }}</span>
+        <span class="stat-label">Missing Skills</span>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3 class="chart-title">Score Breakdown</h3>
+        <canvas id="chartScores" height="220"></canvas>
+      </div>
+      {% if record.matched_skills or record.missing_skills %}
+      <div class="chart-card">
+        <h3 class="chart-title">Matched vs Missing</h3>
+        <canvas id="chartSkills" height="220"></canvas>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Skills -->
+    {% if record.matched_skills %}
+    <div class="skills-section">
+      <h2 class="section-title">✅ Matched Skills ({{ record.matched_skills | length }})</h2>
+      <div class="chip-group">
+        {% for s in record.matched_skills %}
+          <span class="chip chip--green">{{ s }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if record.missing_skills %}
+    <div class="skills-section">
+      <h2 class="section-title">❌ Missing Skills ({{ record.missing_skills | length }})</h2>
+      <div class="chip-group">
+        {% for s in record.missing_skills %}
+          <span class="chip chip--red">{{ s }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="detail-actions">
+      <a href="{{ url_for('main.index') }}" class="btn btn--primary">New Analysis</a>
+      <form method="POST"
+            action="{{ url_for('main.delete_record', record_id=record.id) }}"
+            onsubmit="return confirm('Delete this record?')">
+        <button type="submit" class="btn btn--danger">Delete Record</button>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const scored = {{ record.overall_score }};
+  const textSim = {{ record.text_similarity }};
+  const skillMatch = {{ record.skill_match }};
+  const matchedCount = {{ record.matched_skills | length }};
+  const missingCount = {{ record.missing_skills | length }};
+
+  const barColor  = 'rgba(99,102,241,0.85)';
+  const greenColor = 'rgba(34,197,94,0.85)';
+  const redColor  = 'rgba(239,68,68,0.85)';
+
+  // Score breakdown bar chart
+  new Chart(document.getElementById('chartScores'), {
+    type: 'bar',
+    data: {
+      labels: ['Overall', 'Text Similarity', 'Skill Match'],
+      datasets: [{
+        label: 'Score (%)',
+        data: [scored, textSim, skillMatch],
+        backgroundColor: [barColor, 'rgba(59,130,246,0.85)', greenColor],
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0, max: 100, ticks: { callback: v => v + '%' } }
+      }
+    }
+  });
+
+  // Matched vs missing doughnut
+  const skillCanvas = document.getElementById('chartSkills');
+  if (skillCanvas && (matchedCount + missingCount) > 0) {
+    new Chart(skillCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: ['Matched', 'Missing'],
+        datasets: [{
+          data: [matchedCount, missingCount],
+          backgroundColor: [greenColor, redColor],
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

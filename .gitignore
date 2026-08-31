@@ -1,0 +1,37 @@
+# ── Python ────────────────────────────────────────────────
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.spec
+
+# ── Environment / secrets ─────────────────────────────────
+.env
+
+# ── Runtime data (NEVER commit) ──────────────────────────
+instance/
+uploads/
+*.db
+*.sqlite3
+*.log
+
+# ── Personal files (safety net) ──────────────────────────
+*.pdf
+*.docx
+*.doc
+
+# ── IDE / OS ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Test / coverage cache ─────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage

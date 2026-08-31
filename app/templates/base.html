@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ResumeLens{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="nav-brand" href="{{ url_for('main.index') }}">
+        <span class="brand-icon">🔍</span>
+        <span class="brand-text">ResumeLens</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+           href="{{ url_for('main.index') }}">Analyse</a>
+        <a class="nav-link {% if request.endpoint and 'history' in request.endpoint %}active{% endif %}"
+           href="{{ url_for('main.history') }}">History</a>
+      </div>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" role="alert" aria-live="polite">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main role="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>ResumeLens &mdash; Stage 9 &middot; Built with Flask &amp; Python 3.13</p>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}ResumeLens — History{% endblock %}
+
+{% block content %}
+<section class="history-section">
+  <div class="container">
+    <div class="history-header">
+      <h1 class="page-title">Analysis History</h1>
+      {% if records %}
+        <form method="POST" action="{{ url_for('main.clear_history') }}"
+              class="clear-form" onsubmit="return confirmClear(event)">
+          <input type="hidden" name="confirm" id="clearConfirmInput" value="" />
+          <button type="submit" class="btn btn--danger btn--sm">Clear All</button>
+        </form>
+      {% endif %}
+    </div>
+
+    {% if not records %}
+      <div class="empty-state">
+        <div class="empty-icon">📂</div>
+        <p class="empty-title">No analyses yet</p>
+        <p class="empty-hint">Upload a resume on the
+          <a href="{{ url_for('main.index') }}">Analyse page</a> to get started.</p>
+      </div>
+    {% else %}
+      <div class="history-table-wrap">
+        <table class="history-table" aria-label="Analysis history">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>File</th>
+              <th>Candidate</th>
+              <th>Overall</th>
+              <th>Text Sim.</th>
+              <th>Skill Match</th>
+              <th>Matched</th>
+              <th>Missing</th>
+              <th>Date (UTC)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in records %}
+            <tr>
+              <td class="td-id">{{ r.id }}</td>
+              <td class="td-file">
+                <a href="{{ url_for('main.history_detail', record_id=r.id) }}"
+                   class="history-link">{{ r.filename | e }}</a>
+              </td>
+              <td class="td-name">{{ (r.resume_name or '—') | e }}</td>
+              <td class="td-score">
+                {% if r.overall_score is not none %}
+                  <span class="score-badge score-badge--{{ r.overall_score | verdict_class }}">
+                    {{ r.overall_score | round(1) }}%
+                  </span>
+                {% else %}
+                  <span class="score-badge score-badge--neutral">—</span>
+                {% endif %}
+              </td>
+              <td>{% if r.text_similarity is not none %}{{ r.text_similarity | round(1) }}%{% else %}—{% endif %}</td>
+              <td>{% if r.skill_match is not none %}{{ r.skill_match | round(1) }}%{% else %}—{% endif %}</td>
+              <td class="td-green">{{ r.matched_skills | length }}</td>
+              <td class="td-red">{{ r.missing_skills | length }}</td>
+              <td class="td-date">{{ r.analysis_date[:16] }}</td>
+              <td>
+                <form method="POST"
+                      action="{{ url_for('main.delete_record', record_id=r.id) }}"
+                      onsubmit="return confirm('Delete this record?')">
+                  <button type="submit" class="btn btn--danger btn--xs"
+                          aria-label="Delete record {{ r.id }}">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmClear(e) {
+  e.preventDefault();
+  const answer = prompt('Type YES to clear all history. This cannot be undone.');
+  if (answer && answer.trim().toUpperCase() === 'YES') {
+    document.getElementById('clearConfirmInput').value = 'yes';
+    e.target.submit();
+  }
+  return false;
+}
+</script>
+{% endblock %}
