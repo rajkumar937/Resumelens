@@ -59,6 +59,13 @@ def service_worker():
     response.headers["Service-Worker-Allowed"] = "/"
     return response
 
+@bp.route("/manifest.json")
+def web_manifest():
+    static_dir = os.path.join(current_app.root_path, "static")
+    response = send_from_directory(static_dir, "manifest.json")
+    response.headers["Cache-Control"] = "no-cache"
+    return response
+
 
 # ── Analyse ───────────────────────────────────────────────
 @bp.route("/analyse", methods=["POST"])
