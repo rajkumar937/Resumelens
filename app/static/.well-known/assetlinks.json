@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.resumelens.app",
+      "sha256_cert_fingerprints": [
+        "FC:DD:99:5E:73:23:29:F9:81:87:F3:35:31:87:05:C2:1C:71:08:BD:EE:55:B4:66:FE:78:B7:CB:23:12:02:7C"
+      ]
+    }
+  }
+]

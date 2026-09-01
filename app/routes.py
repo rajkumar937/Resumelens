@@ -66,6 +66,21 @@ def web_manifest():
     response.headers["Cache-Control"] = "no-cache"
     return response
 
+@bp.route("/.well-known/assetlinks.json")
+def assetlinks():
+    static_dir = os.path.join(
+        current_app.root_path,
+        "static",
+        ".well-known"
+    )
+    response = send_from_directory(
+        static_dir,
+        "assetlinks.json",
+        mimetype="application/json"
+    )
+    response.headers["Cache-Control"] = "public, max-age=3600"
+    return response
+
 
 # ── Analyse ───────────────────────────────────────────────
 @bp.route("/analyse", methods=["POST"])
