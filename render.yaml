@@ -1,0 +1,27 @@
+# Optional: one-click config for Render.com (render.com/docs/blueprint-spec).
+# Not required — any platform that runs `gunicorn -b 0.0.0.0:$PORT wsgi:app`
+# works (Railway, Fly.io, Heroku-style buildpacks, a VPS, etc).
+services:
+  - type: web
+    name: resumelens
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -k gthread --threads 4 -b 0.0.0.0:$PORT wsgi:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: TRUST_PROXY
+        value: "true"
+      - key: UPLOAD_FOLDER
+        value: /var/data/uploads
+      - key: DB_PATH
+        value: /var/data/resumelens.db
+    disk:
+      name: resumelens-data
+      mountPath: /var/data
+      sizeGB: 1

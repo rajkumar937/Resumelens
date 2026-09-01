@@ -9,7 +9,7 @@ import json
 import os
 from datetime import datetime, timezone
 
-_DB_PATH = os.path.join(
+_DB_PATH = os.environ.get("DB_PATH") or os.path.join(
     os.path.dirname(os.path.dirname(__file__)), "instance", "resumelens.db"
 )
 

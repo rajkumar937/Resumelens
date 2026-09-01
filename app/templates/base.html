@@ -4,10 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}ResumeLens{% endblock %}</title>
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Analyse resumes against job descriptions and get an instant match score." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ResumeLens" />
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+  <link rel="icon" href="{{ url_for('static', filename='icons/icon-192.png') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pwa-additions.css') }}?v=1" />
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -23,6 +33,7 @@
            href="{{ url_for('main.index') }}">Analyse</a>
         <a class="nav-link {% if request.endpoint and 'history' in request.endpoint %}active{% endif %}"
            href="{{ url_for('main.history') }}">History</a>
+        <button class="btn btn--install hidden" id="installAppBtn" type="button">Install app</button>
       </div>
     </div>
   </nav>
@@ -45,6 +56,7 @@
     <p>ResumeLens &mdash; Stage 9 &middot; Built with Flask &amp; Python 3.13</p>
   </footer>
 
+  <script src="{{ url_for('static', filename='js/pwa.js') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

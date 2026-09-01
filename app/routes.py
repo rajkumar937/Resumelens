@@ -9,7 +9,7 @@ import uuid
 import logging
 from flask import (
     Blueprint, render_template, request, jsonify,
-    redirect, url_for, flash, current_app,
+    redirect, url_for, flash, current_app, send_from_directory,
 )
 from werkzeug.utils import secure_filename
 
@@ -42,6 +42,22 @@ def _safe_float(value, default: float = 0.0) -> float:
 @bp.route("/")
 def index():
     return render_template("index.html")
+
+
+# ── PWA ───────────────────────────────────────────────────
+@bp.route("/offline")
+def offline():
+    return render_template("offline.html")
+
+
+@bp.route("/sw.js")
+def service_worker():
+    # Served from root (not /static/) so its scope covers the whole app.
+    static_dir = os.path.join(current_app.root_path, "static")
+    response = send_from_directory(static_dir, "sw.js")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
 
 
 # ── Analyse ───────────────────────────────────────────────

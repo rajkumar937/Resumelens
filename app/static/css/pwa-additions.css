@@ -1,0 +1,62 @@
+/* ════════════════════════════════════════════════════════════ */
+/* PWA + mobile deployment additions (appended, does not replace
+   any existing rule in main.css) */
+/* ════════════════════════════════════════════════════════════ */
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  .navbar {
+    padding-top: env(safe-area-inset-top);
+  }
+  .site-footer {
+    padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
+  }
+}
+
+.btn--install {
+  background: transparent;
+  border: 1px solid rgba(6, 182, 212, 0.55);
+  color: var(--color-cyan, #06b6d4);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn--install:hover {
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.btn--install.hidden {
+  display: none;
+}
+
+@media (max-width: 380px) {
+  .nav-brand .brand-text {
+    display: none;
+  }
+
+  .upload-card {
+    padding: var(--spacing-md);
+  }
+
+  .score-ring-wrap {
+    width: 130px;
+    height: 130px;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+@media (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .tab-btn {
+    min-height: 44px;
+  }
+}
